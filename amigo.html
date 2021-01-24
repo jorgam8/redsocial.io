@@ -76,8 +76,8 @@
 
     async function acceso() {
         try {
-            const usuarioAutorizado = await ctrlSession.protege("Usuarios");
-            menus.protege(usuarioAutorizado.privilegios);
+            const usuarioAutorizado = await ctrlSession.acceso("Usuarios");
+            menus.acceso(usuarioAutorizado.privilegios);
             busca();
         } catch (error) {
             muestraError(error)
