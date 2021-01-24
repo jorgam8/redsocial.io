@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Hobbies</title>
+    <script
+            src="https://www.gstatic.com/firebasejs/7.24.0/firebase-app.js"></script>
+    <script
+            src="https://www.gstatic.com/firebasejs/7.24.0/firebase-auth.js"></script>
+    <script
+            src="https://www.gstatic.com/firebasejs/7.24.0/firebase-firestore.js"></script>
+    <script
+            src="https://www.gstatic.com/firebasejs/7.24.0/firebase-storage.js"></script>
+    <script src="js/init.js"></script>
+    <script type="module" src="secciones/menus.js"></script>
+    <script type="module" src="secciones/my-footer.js"></script>
+    <script type="module" src="secciones/cargando.js"></script>
+    <link rel="stylesheet" href="css/estilos.css">
+</head>
+<body>
+<menus id="menus"></menus>
+<header>
+    <h1>Hobbies</h1>
+    <a href="hobbieNuevo.html">Agregar…</a>
+</header>
+<ul id="lista" class="lista">
+    <li>
+        <cargando></cargando>
+    </li>
+</ul>
+<my-footer></my-footer>
+<script type="module">
+    import {BaseDatos} from "./js/base-datos";
+    import {cod, muestraError} from "./libs/utils";
+    import {InfoPasatiempos} from "./js/InfoPasatiempos";
+    import {InfoUsuarios} from "./js/InfoUsuarios";
+    import {muestraSesión} from "./js/navigation";
+
+    const ctrlSession = BaseDatos.instancia.ctrlSession;
+    const ctrlPasatiempos = BaseDatos.instancia.ctrlPasatiempos;
+
+    acceso();
+
+    async function acceso() {
+        try {
+            const usuarioAutorizado = await ctrlSession.protege("Pasatiempos");
+            manus.protege(usuarioAutorizado.privilegios);
+            ctrlPasatiempos.consulta(muestraError, muestraPasatiempos);
+        } catch (error) {
+            muestraError(error)
+            muestraSesión();
+        }
+    }
+
+    /** @param {InfoPasatiempos[]} pasatiempos */
+    function muestraPasatiempos(pasatiempos) {
+        lista.innerHTML = pasatiempos.map(p => {
+            const parámetros = new URLSearchParams();
+            parámetros.append("id", p.id);
+            return (/* html */
+                `<li>
+              <a href="hobbie.html?${parámetros}"><strong>${cod(p.nombre)}</strong></a>
+            </li>`);
+        }).join("");
+    }
+</script>
+</body>
+</html>

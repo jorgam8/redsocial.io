@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Amigos</title>
+    <script
+            src="https://www.gstatic.com/firebasejs/7.24.0/firebase-app.js"></script>
+    <script
+            src="https://www.gstatic.com/firebasejs/7.24.0/firebase-auth.js"></script>
+    <script
+            src="https://www.gstatic.com/firebasejs/7.24.0/firebase-firestore.js"></script>
+    <script
+            src="https://www.gstatic.com/firebasejs/7.24.0/firebase-storage.js"></script>
+    <script src="js/init.js"></script>
+    <script type="module" src="secciones/menus.js"></script>
+    <script type="module" src="secciones/my-footer.js"></script>
+    <script type="module" src="secciones/cargando.js"></script>
+    <link rel="stylesheet" href="css/estilos.css">
+</head>
+<body>
+<menus id="menus"></menus>
+<header>
+    <h1>Amigos</h1>
+    <a href="amigoNuevo.html">Agregar…</a>
+</header>
+<ul id="lista" class="lista con_imagen">
+    <li>
+        <cargando></cargando>
+    </li>
+</ul>
+<my-footer></my-footer>
+<script type="module">
+    import {BaseDatos} from "./js/base-datos.js";
+    import {cod, muestraError} from "./libs/utils";
+    import {InfoUsuarios} from "./js/InfoUsuarios";
+    import {muestraSesión} from "./js/navigation";
+
+    const ctrlSession = BaseDatos.instancia.ctrlSession;
+    const ctrlUsuarios = BaseDatos.instancia.ctrlUsuarios;
+    const foraneas = BaseDatos.instancia.forUsuarios;
+
+    acceso();
+
+    async function acceso() {
+        try {
+            const usuarioAutorizado = await ctrlSession.protege("Usuarios");
+            menus.protege(usuarioAutorizado.privilegios);
+            ctrlUsuarios.consulta(muestraError, muestraUsuarios);
+        } catch (error) {
+            muestraError(error);
+            muestraSesión();
+        }
+    }
+
+    /** @param {InfoUsuarios[]} usuarios */
+    function muestraUsuarios(usuarios) {
+        lista.innerHTML = usuarios.map(u => {
+            const parámetros = new URLSearchParams();
+            parámetros.append("id", u.email);
+            const nombre = u.pasatiempo ? u.pasatiempo.nombre : "";
+            const privilegios =
+                u.privilegios.map(p => foraneas.renderPrivilegio(p)).join("<br>");
+            return (/* html */
+                `<li>
+              <a href="usuario.html?${parámetros}">
+                <span class="marco">
+                  <img src="${cod(u.urlDeAvatar)}" alt="Falta el Avatar">
+                </span>
+                <span>
+                  <strong>${cod(u.email)}</strong><br>
+                  ${cod(nombre)}<br>
+                  ${privilegios}
+                </span>
+              </a>
+            </li>`);
+        }).join("");
+    }
+</script>
+</body>
+</html>

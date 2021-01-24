@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Amigo Nuevo</title>
+    <script
+            src="https://www.gstatic.com/firebasejs/7.24.0/firebase-app.js"></script>
+    <script
+            src="https://www.gstatic.com/firebasejs/7.24.0/firebase-auth.js"></script>
+    <script
+            src="https://www.gstatic.com/firebasejs/7.24.0/firebase-firestore.js"></script>
+    <script
+            src="https://www.gstatic.com/firebasejs/7.24.0/firebase-storage.js"></script>
+    <script src="js/init.js"></script>
+    <script type="module" src="secciones/menus.js"></script>
+    <script type="module" src="secciones/my-footer.js"></script>
+    <script type="module" src="secciones/cargando.js"></script>
+    <link rel="stylesheet" href="css/estilos.css">
+</head>
+<body>
+<form id="forma">
+    <menus id="menus"></menus>
+    <header>
+        <a href="amigos.html">Cancelar</a>
+        <h1>Amigo Nuevo</h1>
+        <button type="submit">Guardar</button>
+    </header>
+    <p><label>Correo<input name="cue" type="email"></label></p>
+    <p>
+        <label>
+            Imágen de Perfil
+            <input name="avatar" type="file" accept=".png,.jpg,.jpeg,.gif">
+        </label>
+    </p>
+    <!-- Maneja una asociación a uno. -->
+    <p>
+        <label>
+            Hobbie
+            <select name="hobbie">
+                <option>Cargando. Espere...</option>
+            </select>
+        </label>
+    </p>
+    <!-- Maneja una asociación a muchos. -->
+    <fieldset>
+        <legend>Privilegios</legend>
+        <ul id="privilegios" class="checks">
+            <li>
+                <cargando></cargando>
+            </li>
+        </ul>
+    </fieldset>
+</form>
+<my-footer></my-footer>
+<script type="module">
+    import {muestraError} from "./libs/utils";
+    import {BaseDatos} from "./js/base-datos";
+    import {InfoPasatiempos} from "./js/InfoPasatiempos";
+    import {InfoPrivilegios} from "./js/InfoPrivilegios";
+    import {InfoUsuarios} from "./js/InfoUsuarios";
+    import {muestraSesión, muestraUsuarios} from "./js/navigation";
+
+    const ctrlSession = BaseDatos.instancia.ctrlSession;
+    const ctrlUsuarios = BaseDatos.instancia.ctrlUsuarios;
+    const foraneas = BaseDatos.instancia.forUsuarios;
+
+    acceso();
+
+    async function acceso() {
+        try {
+            const usuarioAutorizado = await ctrlSession.protege("Usuarios");
+            menus.protege(usuarioAutorizado.privilegios);
+            forma.addEventListener("submit", guarda);
+            ctrlUsuarios.foraneas(muestraError, muestraPasatiempos, muestraPrivilegios);
+        } catch (error) {
+            muestraError(error)
+            muestraSesión();
+        }
+    }
+
+    /** @param {InfoPasatiempos[]} pasatiempos */
+    function muestraPasatiempos(pasatiempos) {
+        foraneas.muestraPasatiempos(forma.pasatiempo, "", pasatiempos);
+    }
+
+    /** @param {InfoPrivilegios[]} privs */
+    function muestraPrivilegios(privs) {
+        foraneas.muestraPrivilegios(privilegios, [], privs);
+    }
+
+    /** @param {Event} evt */
+    async function guarda(evt) {
+        try {
+            evt.preventDefault();
+            const data = new FormData(forma);
+            const pasatiempo = new InfoPasatiempos({
+                id: data.get("pasatiempo"),
+                nombre: null
+            });
+            const privilegios = data.getAll("privilegios").map(id => new InfoPrivilegio({
+                nombre: id,
+                descripción: null
+            }));
+            /**@type {InfoUsuarios} */
+            const modelo = new InfoUsuarios({
+                email: data.get("cue"),
+                avatar: data.get("avatar"),
+                urlDeAvatar: null,
+                pasatiempo,
+                privilegios
+            });
+            await ctrlUsuarios.agrega(modelo);
+            muestraUsuarios();
+        } catch (error) {
+            muestraError(error);
+        }
+    }
+</script>
+</body>
+</html>

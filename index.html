@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MiniRedSocial</title>
+    <!-- Carga el núcleo de Firebase JS SDK -->
+    <script src="https://www.gstatic.com/firebasejs/7.24.0/firebase-app.js"></script>
+    <!-- Agrega el manejo de autenticación. -->
+    <script src="https://www.gstatic.com/firebasejs/7.24.0/firebase-auth.js"></script>
+    <!-- Agrega el manejo de bases de datos. -->
+    <script src="https://www.gstatic.com/firebasejs/7.24.0/firebase-firestore.js"></script>
+    <!-- Agrega el manejo de storage. -->
+    <script src="https://www.gstatic.com/firebasejs/7.24.0/firebase-storage.js"></script>
+    <!-- Configura la app usando la información del sitio de Firebase. -->
+    <script src="js/init.js"></script>
+    <script type="module" src="secciones/menus.js"></script>
+    <script type="module" src="secciones/my-footer.js"></script>
+    <script type="module" src="secciones/cargando.js"></script>
+    <link rel="stylesheet" href="css/estilos.css">
+</head>
+<body>
+<menus id="menus"></menus>
+<header>
+    <h1>Red Social</h1>
+    <button id=salir type="button">Salir</button>
+</header>
+<figure><img id="avatar" src="" alt="Avatar"></figure>
+<p>
+    <label>
+        E-mail
+        <output id="email">
+            <cargando></cargando>
+        </output>
+    </label>
+</p>
+<p>
+    <label>
+        Nombre
+        <output id="nombre">
+            <cargando></cargando>
+        </output>
+    </label>
+</p>
+<my-footer></my-footer>
+<script type="module">
+    import {BaseDatos} from "./js/base-datos.js";
+    import {muestraError} from "./libs/utils";
+
+    const ctrlSession = BaseDatos.instancia.ctrlSession;
+    terminarSesion.addEventListener("click",
+        () => ctrlSession.terminarSesion());
+
+    acceso();
+
+    async function acceso() {
+        try {
+            const usuarioAutorizado = await ctrlSession.acceso("");
+            menus.acceso(usuarioAutorizado.privilegios);
+            email.value = usuarioAutorizado.email;
+            nombre.value = usuarioAutorizado.nombre;
+            avatar.src = usuarioAutorizado.urlFoto;
+        } catch (error) {
+            muestraError(error)
+        }
+    }
+</script>
+</body>
+</html>

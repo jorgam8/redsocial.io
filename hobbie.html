@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Hobbie</title>
+    <script
+            src="https://www.gstatic.com/firebasejs/7.24.0/firebase-app.js"></script>
+    <script
+            src="https://www.gstatic.com/firebasejs/7.24.0/firebase-auth.js"></script>
+    <script
+            src="https://www.gstatic.com/firebasejs/7.24.0/firebase-firestore.js"></script>
+    <script
+            src="https://www.gstatic.com/firebasejs/7.24.0/firebase-storage.js"></script>
+    <script src="js/init.js"></script>
+    <script type="module" src="secciones/menus.js"></script>
+    <script type="module" src="secciones/my-footer.js"></script>
+    <link rel="stylesheet" href="css/estilos.css">
+</head>
+<body>
+<form id="forma">
+    <menus id="menus"></menus>
+    <header>
+        <a href="hobbies.html">Cancelar</a>
+        <h1>Hobbie</h1>
+        <button type="submit">Guardar</button>
+        <button id="eliminar" type="button">Eliminar</button>
+    </header>
+    <p>
+        <label>
+            Nombre
+            <input name="nombre" type="text" value="Cargando…">
+        </label>
+    </p>
+</form>
+<my-footer></my-footer>
+<script type="module">
+    import {BaseDatos} from "./js/base-datos";
+    import {muestraError} from "./libs/utils";
+    import {InfoPasatiempos} from "./js/InfoPasatiempos";
+    import {muestraPasatiempos, muestraSesión} from "./js/navigation";
+
+    const ctrlSession = BaseDatos.instancia.ctrlSession;
+    const ctrlPasatiempos = BaseDatos.instancia.ctrlPasatiempos;
+
+    const params = new URL(location.href).searchParams;
+    const id = params.get("id");
+
+    acceso();
+
+    async function acceso() {
+        try {
+            const usuarioAutorizado = await ctrlSession.protege("Pasatiempos");
+            menus.protege(usuarioAutorizado.privilegios);
+            busca();
+        } catch (error) {
+            muestraError(error)
+            muestraSesión();
+        }
+    }
+
+    /** Busca y muestra los datos que corresponden al id recibido. */
+    async function busca() {
+        try {
+            const modelo = await ctrlPasatiempos.busca(id);
+            forma.nombre.value = modelo.nombre;
+            forma.addEventListener("submit", guarda);
+            eliminar.addEventListener("click", elimina);
+        } catch (e) {
+            muestraError(e);
+        }
+    }
+
+    /** @param {Event} evt */
+    async function guarda(evt) {
+        try {
+            evt.preventDefault();
+            const data = new FormData(forma);
+            const modelo = new InfoPasatiempos({
+                id,
+                nombre: data.get("nombre")
+            });
+            await ctrlPasatiempos.modifica(modelo);
+            muestraPasatiempos();
+        } catch (error) {
+            muestraError(error);
+        }
+    }
+
+    async function elimina() {
+        try {
+            if (confirm("Confirmar la eliminación")) {
+                await ctrlPasatiempos.elimina(id);
+                muestraPasatiempos();
+            }
+        } catch (e) {
+            procesaError(e);
+        }
+    }
+</script>
+</body>
+</html>

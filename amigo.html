@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Amigo</title>
+    <script
+            src="https://www.gstatic.com/firebasejs/7.24.0/firebase-app.js"></script>
+    <script
+            src="https://www.gstatic.com/firebasejs/7.24.0/firebase-auth.js"></script>
+    <script
+            src="https://www.gstatic.com/firebasejs/7.24.0/firebase-firestore.js"></script>
+    <script
+            src="https://www.gstatic.com/firebasejs/7.24.0/firebase-storage.js"></script>
+    <script src="js/init.js"></script>
+    <script type="module" src="secciones/menus.js"></script>
+    <script type="module" src="secciones/my-footer.js"></script>
+    <script type="module" src="secciones/cargando.js"></script>
+    <link rel="stylesheet" href="css/estilos.css">
+</head>
+<body>
+<form id="forma">
+    <menus id="menus"></menus>
+    <header>
+        <a href="amigos.html">Cancelar</a>
+        <h1>
+            <output name="cue">Usuario
+                <cargando></cargando>
+            </output>
+        </h1>
+        <button type="submit">Guardar</button>
+        <button id="eliminar" type="button">Eliminar</button>
+    </header>
+    <figure id="figure"><img id="img" alt="Falta el Avatar"></figure>
+    <p>
+        <label>
+            Avatar
+            <input name="avatar" type="file" accept=".png,.jpg,.jpeg,.gif">
+        </label>
+    </p>
+    <!-- Maneja una asociación a uno. -->
+    <p>
+        <label>
+            Hobbie
+            <select name="pasatiempo">
+                <option>Cargando. Espere...</option>
+            </select>
+        </label>
+    </p>
+    <!-- Maneja una asociación a muchos. -->
+    <fieldset>
+        <legend>Privilegios</legend>
+        <ul id="privilegios" class="checks">
+            <li>
+                <cargando></cargando>
+            </li>
+        </ul>
+    </fieldset>
+</form>
+<my-footer></my-footer>
+<script type="module">
+    import {muestraError} from "./libs/utils";
+    import {BaseDatos} from "./js/base-datos";
+    import {InfoPasatiempos} from "./js/InfoPasatiempos";
+    import {InfoPrivilegios} from "./js/InfoPrivilegios";
+    import {InfoUsuarios} from "./js/InfoUsuarios";
+    import {muestraSesión, muestraUsuarios} from "./js/navigation";
+
+    const ctrlSession = BaseDatos.instancia.ctrlSession;
+    const ctrlUsuarios = BaseDatos.instancia.ctrlUsuarios;
+    const foraneas = BaseDatos.instancia.forUsuarios;
+
+    const params = new URL(location.href).searchParams;
+    const id = params.get("id");
+
+    acceso();
+
+    async function acceso() {
+        try {
+            const usuarioAutorizado = await ctrlSession.protege("Usuarios");
+            menus.protege(usuarioAutorizado.privilegios);
+            busca();
+        } catch (error) {
+            muestraError(error)
+            muestraSesión();
+        }
+    }
+
+    /** Busca y muestra los datos que corresponden al id recibido. */
+    async function busca() {
+        try {
+            const modelo = await ctrlUsuarios.busca(id);
+            if (modelo) {
+                forma.cue.value = id;
+                ctrlUsuarios.foraneas(muestraError, muestraPasatiempos, muestraPrivilegios);
+                forma.addEventListener("submit", guarda);
+                eliminar.addEventListener("click", elimina);
+                img.src = modelo.urlDeAvatar;
+            }
+
+            /** @param {InfoUsuarios} modelo
+             * @param {InfoPasatiempos[]} pasatiempos */
+            function muestraPasatiempos(pasatiempos) {
+                const pasatiempoId = modelo.pasatiempo ? modelo.pasatiempo.id : "";
+                foraneas.muestraPasatiempos(forma.pasatiempo, pasatiempoId,
+                    pasatiempos);
+            }
+
+            /** @param {InfoUsuarios} modelo
+             * @param {InfoPrivilegios[]} privs */
+            function muestraPrivilegios(privs) {
+                const privilegioIds = modelo.privilegios.map(p => p.nombre);
+                foraneas.muestraPrivilegios(privilegios, privilegioIds, privs);
+            }
+        } catch (e) {
+            muestraError(e);
+            muestraUsuarios();
+        }
+    }
+
+    /** @param {Event} evt */
+    async function guarda(evt) {
+        try {
+            evt.preventDefault();
+            const data = new FormData(forma);
+            const pasatiempo = new InfoPasatiempo({
+                id: data.get("pasatiempo"),
+                nombre: null
+            });
+            const privilegios = data.getAll("privilegios").map(id => new InfoPrivilegio({
+                nombre: id,
+                descripción: null
+            }));
+            const modelo = new InfoUsuario({
+                email: id,
+                avatar: data.get("avatar"),
+                urlDeAvatar: null,
+                pasatiempo,
+                privilegios
+            });
+            await ctrlUsuarios.modifica(modelo);
+            muestraUsuarios();
+        } catch (error) {
+            muestraError(error);
+        }
+    }
+
+    async function elimina() {
+        try {
+            if (confirm("Confirmar la eliminación")) {
+                await ctrlUsuarios.elimina(id);
+                muestraUsuarios();
+            }
+        } catch (e) {
+            muestraError(e);
+        }
+    }
+</script>
+</body>
+</html>
