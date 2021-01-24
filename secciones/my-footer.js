@@ -1,5 +1,5 @@
 class MyFooter extends HTMLElement {
-    connectedcallback() {
+    connectedCallback() {
         this.innerHTML = /* html */
             `Copyright &copy;2021 López Cruz Jorge Diego`
     }
