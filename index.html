@@ -23,7 +23,7 @@
 <menus id="menus"></menus>
 <header>
     <h1>Red Social</h1>
-    <button id=salir type="button">Salir</button>
+    <button id="terminarSesión" type="button">Salir</button>
 </header>
 <figure><img id="avatar" src="" alt="Avatar"></figure>
 <p>
@@ -48,8 +48,8 @@
     import {muestraError} from "./libs/utils";
 
     const ctrlSession = BaseDatos.instancia.ctrlSession;
-    terminarSesion.addEventListener("click",
-        () => ctrlSession.terminarSesion());
+    terminarSesión.addEventListener("click",
+        () => ctrlSession.terminarSesión());
 
     acceso();
 
