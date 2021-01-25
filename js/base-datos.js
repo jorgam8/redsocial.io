@@ -1,6 +1,6 @@
 import {CtrlCatalogo} from "../libs/CtrlCatalogo";
 import {CtrlSession} from "./CtrlSession";
-import {CtrlUsuarios} from "./CtrlSession";
+import {CtrlUsuario} from "./CtrlUsuario";
 import {InterPasatiempos} from "./InterPasatiempos";
 import {InterPrivilegios} from "./InterPrivilegios";
 import {InterStorage} from "./InterStorage";
@@ -31,7 +31,7 @@ export class BaseDatos {
         this.ctrlSession = new CtrlSession(auth, provider, this.interUsuarios);
         this.ctrlPasatiempos =
             new CtrlCatalogo("No se encontró el Hobbie.", this.interPasatiempos);
-        this.ctrlUsuarios = new CtrlUsuarios("No se encontró el Hobbie.",
+        this.ctrlUsuario = new CtrlUsuario("No se encontró el Hobbie.",
             this.interUsuarios, this.interPasatiempos, this.interPrivilegios);
         this.forUsuarios = new ForUsuarios();
     }
