@@ -36,7 +36,7 @@
     import {muestraSesión} from "./js/navigation";
 
     const ctrlSession = BaseDatos.instancia.ctrlSession;
-    const ctrlUsuarios = BaseDatos.instancia.ctrlUsuarios;
+    const ctrlUsuario = BaseDatos.instancia.ctrlUsuario;
     const foraneas = BaseDatos.instancia.forUsuarios;
 
     acceso();
@@ -45,7 +45,7 @@
         try {
             const usuarioAutorizado = await ctrlSession.acceso("Usuarios");
             menus.acceso(usuarioAutorizado.privilegios);
-            ctrlUsuarios.consulta(muestraError, muestraUsuarios);
+            ctrlUsuario.consulta(muestraError, muestraUsuarios);
         } catch (error) {
             muestraError(error);
             muestraSesión();
