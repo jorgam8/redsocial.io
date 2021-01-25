@@ -43,8 +43,8 @@
 
     async function acceso() {
         try {
-            const usuarioAutorizado = await ctrlSession.protege("Usuarios");
-            menus.protege(usuarioAutorizado.privilegios);
+            const usuarioAutorizado = await ctrlSession.acceso("Usuarios");
+            menus.acceso(usuarioAutorizado.privilegios);
             ctrlUsuarios.consulta(muestraError, muestraUsuarios);
         } catch (error) {
             muestraError(error);
@@ -62,7 +62,7 @@
                 u.privilegios.map(p => foraneas.renderPrivilegio(p)).join("<br>");
             return (/* html */
                 `<li>
-              <a href="usuario.html?${parámetros}">
+              <a href="amigo.html?${parámetros}">
                 <span class="marco">
                   <img src="${cod(u.urlDeAvatar)}" alt="Falta el Avatar">
                 </span>
