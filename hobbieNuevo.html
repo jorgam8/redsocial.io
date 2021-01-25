@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <title>Hobbie Nuevo</title>
@@ -40,8 +40,8 @@
 
     async function acceso() {
         try {
-            const usuarioAutorizado = await ctrlSession.protege("Pasatiempos");
-            menus.protege(usuarioAutorizado.privilegios);
+            const usuarioAutorizado = await ctrlSession.acceso("Pasatiempos");
+            menus.acceso(usuarioAutorizado.privilegios);
             forma.addEventListener("submit", guarda);
         } catch (error) {
             muestraError(error)
