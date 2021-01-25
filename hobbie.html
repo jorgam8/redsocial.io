@@ -49,8 +49,8 @@
 
     async function acceso() {
         try {
-            const usuarioAutorizado = await ctrlSession.protege("Pasatiempos");
-            menus.protege(usuarioAutorizado.privilegios);
+            const usuarioAutorizado = await ctrlSession.acceso("Pasatiempos");
+            menus.acceso(usuarioAutorizado.privilegios);
             busca();
         } catch (error) {
             muestraError(error)
