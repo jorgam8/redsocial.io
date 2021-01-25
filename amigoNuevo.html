@@ -61,17 +61,17 @@
     import {muestraSesión, muestraUsuarios} from "./js/navigation";
 
     const ctrlSession = BaseDatos.instancia.ctrlSession;
-    const ctrlUsuarios = BaseDatos.instancia.ctrlUsuarios;
+    const ctrlUsuario = BaseDatos.instancia.ctrlUsuario;
     const foraneas = BaseDatos.instancia.forUsuarios;
 
     acceso();
 
     async function acceso() {
         try {
-            const usuarioAutorizado = await ctrlSession.protege("Usuarios");
-            menus.protege(usuarioAutorizado.privilegios);
+            const usuarioAutorizado = await ctrlSession.acceso("Usuarios");
+            menus.acceso(usuarioAutorizado.privilegios);
             forma.addEventListener("submit", guarda);
-            ctrlUsuarios.foraneas(muestraError, muestraPasatiempos, muestraPrivilegios);
+            ctrlUsuario.foraneas(muestraError, muestraPasatiempos, muestraPrivilegios);
         } catch (error) {
             muestraError(error)
             muestraSesión();
@@ -97,7 +97,7 @@
                 id: data.get("pasatiempo"),
                 nombre: null
             });
-            const privilegios = data.getAll("privilegios").map(id => new InfoPrivilegio({
+            const privilegios = data.getAll("privilegios").map(id => new InfoPrivilegios({
                 nombre: id,
                 descripción: null
             }));
@@ -109,7 +109,7 @@
                 pasatiempo,
                 privilegios
             });
-            await ctrlUsuarios.agrega(modelo);
+            await ctrlUsuario.agrega(modelo);
             muestraUsuarios();
         } catch (error) {
             muestraError(error);
